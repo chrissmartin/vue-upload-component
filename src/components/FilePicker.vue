@@ -28,10 +28,13 @@
          <!--File Previews-->
         <div class="preview-box">
           <div v-for="item in uploadedFiles" :key="item.id" class="img-container"> 
+               <!--File Preview-->
             <img v-if="typecheck(item.fileName)" :src="item.url" class="preview-img" :alt="item.originalName">
             <img v-else src="../assets/file.png" class="preview-img" :alt="item.originalName">
+            <!--Remove btn to remove individual files-->
             <img  src="../assets/error.png" v-on:click="removeFile(fileCount,uploadedFiles.indexOf(item));" class="close" alt="Remove">
-            <p>{{item.fileName}}</p>
+            <!--File Name-->
+            <p style="max-width: 100px;">{{item.fileName}}</p>
           </div>
         </div>
         <!--  Submit to your storage service-->
