@@ -31,7 +31,7 @@
             <!--Remove btn to remove individual files-->
             <img  src="../assets/error.png" v-on:click="removeFile(fileCount,uploadedFiles.indexOf(item));" class="close" alt="Remove">
             <!--File Name-->
-            <p style="max-width: 100px;">{{item.fileName}}</p>
+            <p v-if="fname=ftruncate(item.fileName)" style="max-width: 100px;">{{fname}}</p>
           </div>
         </div>
         <!--  Submit to your storage service-->
@@ -70,7 +70,8 @@
         fileCount: 0,
         uploadError: null,
         currentStatus: null,
-        uploadFieldName: 'photos'
+        uploadFieldName: 'photos',
+        fname: ''
       }
     },
     computed: {
@@ -141,7 +142,17 @@
           this.uploadedFiles.splice(key, 1);
         }
       },
-      
+      //Func to truncate long filenames to short ones to display
+      ftruncate(n) {
+          var len = 7;
+          var ext = n.substring(n.lastIndexOf(".") + 1, n.length).toLowerCase();
+          var filename = n.replace('.'+ext,'');
+          if(filename.length <= len) {
+              return n;
+          }
+          filename = filename.substr(0, len) + (n.length > len ? '[...]' : '');
+          return filename + '.' + ext;
+      },
       // Handle file changes
       filesChange(fieldName, fileList) {
         const formData = new FormData();
