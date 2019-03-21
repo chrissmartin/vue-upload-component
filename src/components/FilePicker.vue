@@ -21,9 +21,6 @@
       <!--SUCCESS-->
       <div v-if="isSuccess">
         <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
-        <p>
-          <a class="cancel" href="javascript:void(0)" @click="reset()">Cancel Upload</a>
-        </p>
 
          <!--File Previews-->
         <div class="preview-box">
@@ -39,7 +36,11 @@
         </div>
         <!--  Submit to your storage service-->
         <!--For now just reset() back to the main menu-->
+        <div style="display: flex;">
+        <button class="btn-cancel" v-on:click="reset()">Cancel</button>
         <button class="btn" v-on:click="reset()">Submit</button>
+        </div>
+
       </div>
 
       <!--FAILED-->
@@ -140,6 +141,7 @@
           this.uploadedFiles.splice(key, 1);
         }
       },
+      
       // Handle file changes
       filesChange(fieldName, fileList) {
         const formData = new FormData();
@@ -228,9 +230,21 @@
     text-decoration: none;
   }
   .btn{
-    position: relative;
-    margin-top: 10px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
     background-color: #fff;
+    border: 0px;
+    box-shadow: 2px 3px 12px 1px #ddd;
+    border-radius: 3px;
+    width: 80px;
+    height: 30px;
+  }
+    .btn-cancel{
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    background-color: #f5736a;
     border: 0px;
     box-shadow: 2px 3px 12px 1px #ddd;
     border-radius: 3px;
