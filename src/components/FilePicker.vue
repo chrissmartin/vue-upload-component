@@ -1,0 +1,237 @@
+<template>
+  <div id="filepicker">
+    <div class="container upload-card">
+      <!--UPLOAD-->
+      <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
+        <h1>Upload Files</h1>
+        <div class="dropbox">
+          <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" 
+            @change="filesChange($event.target.name, $event.target.files); 
+            fileCount = $event.target.files.length" class="input-file">
+            
+            <p v-if="isInitial">
+              Drag your file(s) here to begin<br> or click to browse
+            </p>
+            <p v-if="isSaving">
+              Uploading {{ fileCount }} files...
+            </p>
+        </div>
+      </form>
+
+      <!--SUCCESS-->
+      <div v-if="isSuccess">
+        <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
+        <p>
+          <a class="cancel" href="javascript:void(0)" @click="reset()">Cancel Upload</a>
+        </p>
+
+         <!--File Previews-->
+        <div class="preview-box">
+          <div v-for="item in uploadedFiles" :key="item.id" class="img-container"> 
+            <img v-if="typecheck(item.fileName)" :src="item.url" class="preview-img" :alt="item.originalName">
+            <img v-else src="../assets/file.png" class="preview-img" :alt="item.originalName">
+            <img  src="../assets/error.png" v-on:click="removeFile(fileCount,uploadedFiles.indexOf(item));" class="close" alt="Remove">
+            <p>{{item.fileName}}</p>
+          </div>
+        </div>
+        <!--  Submit to your storage service-->
+        <!--For now just reset() back to the main menu-->
+        <button class="btn" v-on:click="reset()">Submit</button>
+      </div>
+
+      <!--FAILED-->
+      <div v-if="isFailed">
+        <h2>Uploaded failed.</h2>
+        <p>
+          <a href="javascript:void(0)" @click="reset()">Try again</a>
+        </p>
+        <pre>{{ uploadError }}</pre>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  // swap as you need
+   import { upload } from '../file-upload.fake.service'; // fake service
+  //import { upload } from '../file-upload.service';   // real service
+
+  const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
+
+  export default {
+    name: 'filepicker',
+    data() {
+      return {
+        uploadedFiles: [],
+        fileCount: 0,
+        uploadError: null,
+        currentStatus: null,
+        uploadFieldName: 'photos'
+      }
+    },
+    computed: {
+      //Upload Statuses
+      isInitial() {
+        return this.currentStatus === STATUS_INITIAL;
+      },
+      isSaving() {
+        return this.currentStatus === STATUS_SAVING;
+      },
+      isSuccess() {
+        return this.currentStatus === STATUS_SUCCESS;
+      },
+      isFailed() {
+        return this.currentStatus === STATUS_FAILED;
+      }
+    },
+    methods: {
+      reset() {
+        // reset form to initial state
+        this.currentStatus = STATUS_INITIAL;
+        this.uploadedFiles = [];
+        this.uploadError = null;
+      },
+      //This is where we implement the storage service
+      save(formData) {
+        this.currentStatus = STATUS_SAVING;
+        //Implement your own storage service when upload() is called.
+        //For test purposes, I added a delay service
+        upload(formData)
+         .then(x => {
+            this.uploadedFiles = [].concat(x);
+            this.currentStatus = STATUS_SUCCESS;
+          })
+          .catch(err => {
+            this.uploadError = err.response;
+            this.currentStatus = STATUS_FAILED;
+          });
+      },
+
+      //Returns true for image data types for others false, for preview purpose
+      typecheck(oInput) {
+            var _validFileExtensions = [".jpg", ".jpeg", ".bmp", ".gif", ".png"];
+                if (oInput.length > 0) {
+                    var blnValid = false;
+                    for (var j = 0; j < _validFileExtensions.length; j++) {
+                        var sCurExtension = _validFileExtensions[j];
+                        if (oInput.substr(oInput.length - sCurExtension.length, sCurExtension.length).toLowerCase() == sCurExtension.toLowerCase()) {
+                            blnValid = true;
+                            break;
+                        }
+                    }
+                    if (!blnValid) {
+                        return false;
+                    }
+                }
+         return true;
+      },
+      //Removes the selected file from the array.
+      removeFile(fileCount,key) {
+        fileCount=this.uploadedFiles.length;
+        if(fileCount === 1)
+        {
+          this.uploadedFiles.splice(key, 1);
+          this.reset();
+        }
+        else{
+          this.uploadedFiles.splice(key, 1);
+        }
+      },
+      // Handle file changes
+      filesChange(fieldName, fileList) {
+        const formData = new FormData();
+        if (!fileList.length) return;
+        // append the files to FormData
+        Array.from(Array(fileList.length).keys())
+          .map(x => {
+            formData.append(fieldName, fileList[x], fileList[x].name);
+          });
+
+        // Save it to cloud
+        this.save(formData);
+      }
+    },
+    mounted() {
+      this.reset();
+    },
+  }
+
+</script>
+
+<style>
+  .upload-card{
+    border-radius: 20px;
+    padding: 50px 30px;
+    min-height: 300px;
+    min-width: 300px;
+
+    background-color: #ffffff;
+    -webkit-box-shadow: 2px 4px 20px 2px #dadada;
+    box-shadow: 2px 4px 20px 2px #dadada;
+    margin: auto;
+    width: 50%;
+  }
+  .dropbox {
+    margin: auto;
+    width: 70%;
+    background: #f8f8f8;
+    border-radius: 20px;
+    color: dimgray;
+    padding: 10px 10px;
+    min-height: 200px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .input-file {
+    opacity: 0;/* invisible but it's there! */
+    left: 0px; 
+    width: 100%;
+    height: 200px;
+    position: absolute;
+    cursor: pointer;
+  }
+  
+  .dropbox:hover {
+    background: #E8F5E9;
+  }
+  
+  .dropbox p {
+    font-size: 1.2em;
+    text-align: center;
+    padding: 50px 0;
+  }
+  .img-container{
+    position: relative;
+    display: inline-block;
+    padding: 10px;
+  }
+  .preview-img{
+    width: 80px;
+    padding: 10px;
+    border: 1px dotted #b3b3b39e;
+  }
+  .preview-box{
+    display: inline-block;
+  }
+  .close{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 20px;
+  }
+  .cancel{
+    color: #545454;
+    text-decoration: none;
+  }
+  .btn{
+    position: relative;
+    margin-top: 10px;
+    background-color: #fff;
+    border: 0px;
+    box-shadow: 2px 3px 12px 1px #ddd;
+    border-radius: 3px;
+    width: 80px;
+    height: 30px;
+  }
+</style>
