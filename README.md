@@ -1,8 +1,12 @@
 # upload-vue-component
 An upload component made in VueJS - Drag and Drop, Preview and Selective Remove Features
+```
 ![Upload-Component](https://s2.gifyu.com/images/upload-1-2.jpg)
+
+```
 ![Preview](https://s2.gifyu.com/images/upload-2.jpg)
 
+```
 ## Project setup
 ```
 npm install
