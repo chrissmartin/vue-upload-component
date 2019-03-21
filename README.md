@@ -16,7 +16,8 @@ npm run serve
 ```
 npm run build
 ```
-# -s flag means serve it in Single-Page Application mode
+# Serve in Single-Page Application mode
+(Serves static page in /dist folder)
 
 ```
 serve -s dist
